@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  monitors  Monitor[]
+}
+
+model Monitor {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  url             String
+  intervalSeconds Int            @default(60)
+  isActive        Boolean        @default(true)
+  lastStatus      String?
+  lastCheckedAt   DateTime?
+  nextCheckAt     DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  checks          Check[]
+  notifications   Notification[]
+
+  @@index([isActive, nextCheckAt])
+}
+
+model Check {
+  id                String   @id @default(cuid())
+  monitorId         String
+  monitor           Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  checkedAt         DateTime @default(now())
+  statusCode        Int?
+  responseTimeMs    Int?
+  responseSizeBytes Int?
+  isUp              Boolean
+  error             String?
+
+  @@index([monitorId, checkedAt])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  monitorId  String
+  monitor    Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  channel    String
+  event      String
+  webhookUrl String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([monitorId])
+}
