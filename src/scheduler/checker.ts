@@ -19,8 +19,12 @@ async function performHttpCheck(url: string): Promise<CheckOutcome> {
   const startedAt = Date.now();
 
   try {
-    const response = await fetch(url, { method: "GET", redirect: "follow", signal: controller.signal });
-    
+    const response = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+    });
+
     const body = await response.arrayBuffer();
     const responseTimeMs = Date.now() - startedAt;
     const responseSizeBytes = body.byteLength;
@@ -50,29 +54,28 @@ export async function runCheck(monitor: Monitor): Promise<void> {
 
   const newStatus: MonitorStatus = outcome.isUp ? "up" : "down";
   const previousStatus = monitor.lastStatus as MonitorStatus | null;
-  await prisma.$transaction(async tx => {
-  await tx.check.create({
-    data: {
-      monitorId: monitor.id,
-      statusCode: outcome.statusCode,
-      responseTimeMs: outcome.responseTimeMs,
-      responseSizeBytes: outcome.responseSizeBytes,
-      isUp: outcome.isUp,
-      error: outcome.error,
-    },
-  });
+  await prisma.$transaction(async (transaction) => {
+    await transaction.check.create({
+      data: {
+        monitorId: monitor.id,
+        statusCode: outcome.statusCode,
+        responseTimeMs: outcome.responseTimeMs,
+        responseSizeBytes: outcome.responseSizeBytes,
+        isUp: outcome.isUp,
+        error: outcome.error,
+      },
+    });
 
-  const now = new Date();
+    const now = new Date();
 
-  await tx.monitor.update({
-    where: { id: monitor.id },
-    data: {
-      lastStatus: newStatus,
-      lastCheckedAt: now,
-      nextCheckAt: new Date(now.getTime() + monitor.intervalSeconds * 1000),
-    },
-  });
-
+    await transaction.monitor.update({
+      where: { id: monitor.id },
+      data: {
+        lastStatus: newStatus,
+        lastCheckedAt: now,
+        nextCheckAt: new Date(now.getTime() + monitor.intervalSeconds * 1000),
+      },
+    });
   });
   logger.info("Проверка монитора выполнена", {
     monitorId: monitor.id,
@@ -86,5 +89,3 @@ export async function runCheck(monitor: Monitor): Promise<void> {
     await notifyStatusChange(monitor, newStatus, previousStatus);
   }
 }
-
-

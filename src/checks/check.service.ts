@@ -8,7 +8,11 @@ export interface PaginatedChecks {
   totalPages: number;
 }
 
-export async function listChecks(monitorId: string, page: number, pageSize: number): Promise<PaginatedChecks> {
+export async function listChecks(
+  monitorId: string,
+  page: number,
+  pageSize: number,
+): Promise<PaginatedChecks> {
   const [data, total] = await Promise.all([
     prisma.check.findMany({
       where: { monitorId },

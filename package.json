@@ -10,7 +10,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "vitest run",
-    "test:smoke": "npm run build && node scripts/smoke.cjs"
+    "test:smoke": "npm run build && node scripts/smoke.cjs",
+    "format": "prettier --write \"src/**/*.ts\" \"scripts/**/*.cjs\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.cjs\""
   },
   "license": "UNLICENSED",
   "dependencies": {
@@ -30,6 +32,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20.14.15",
     "@types/swagger-ui-express": "^4.1.8",
+    "prettier": "^3.9.10",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2",
     "vitest": "^2.1.1"

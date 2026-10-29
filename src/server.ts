@@ -12,9 +12,15 @@ let stopping = false;
 async function shutdown() {
   if (stopping) return;
   stopping = true;
-  const closed = new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+  const closed = new Promise<void>((resolve, reject) =>
+    server.close((error) => (error ? reject(error) : resolve())),
+  );
   await Promise.all([closed, stopScheduler()]);
   await prisma.$disconnect();
 }
-process.on("SIGINT", () => { shutdown().catch(console.error); });
-process.on("SIGTERM", () => { shutdown().catch(console.error); });
+process.on("SIGINT", () => {
+  shutdown().catch(console.error);
+});
+process.on("SIGTERM", () => {
+  shutdown().catch(console.error);
+});

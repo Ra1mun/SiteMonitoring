@@ -2,7 +2,11 @@ import { prisma } from "../lib/prisma";
 import { logger } from "../lib/logger";
 import { env } from "../config/env";
 import { HttpError } from "../middleware/errorHandler";
-import { MonitorStatus, NotificationChannel, NotificationEvent } from "../types";
+import {
+  MonitorStatus,
+  NotificationChannel,
+  NotificationEvent,
+} from "../types";
 
 export interface CreateNotificationInput {
   channel: NotificationChannel;
@@ -11,10 +15,16 @@ export interface CreateNotificationInput {
 }
 
 export async function listNotifications(monitorId: string) {
-  return prisma.notification.findMany({ where: { monitorId }, orderBy: { createdAt: "desc" } });
+  return prisma.notification.findMany({
+    where: { monitorId },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
-export async function createNotification(monitorId: string, input: CreateNotificationInput) {
+export async function createNotification(
+  monitorId: string,
+  input: CreateNotificationInput,
+) {
   if (input.channel === "webhook" && !input.webhookUrl) {
     throw new HttpError(400, "Для канала webhook обязателен webhookUrl");
   }
@@ -29,7 +39,10 @@ export async function createNotification(monitorId: string, input: CreateNotific
   });
 }
 
-export async function deleteNotification(userId: string, notificationId: string) {
+export async function deleteNotification(
+  userId: string,
+  notificationId: string,
+) {
   const notification = await prisma.notification.findUnique({
     where: { id: notificationId },
     include: { monitor: true },
@@ -99,4 +112,3 @@ export async function notifyStatusChange(
       .map((n) => sendWebhook(n.webhookUrl as string, payload)),
   );
 }
-

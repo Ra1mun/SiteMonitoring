@@ -20,3 +20,37 @@ docker compose up --build
 - API: http://localhost:3000
 - Swagger UI: http://localhost:3000/docs
 - OpenAPI: http://localhost:3000/openapi.json
+
+## Эндпоинты
+
+| Метод | Путь | Описание |
+|---|---|---|
+| GET | `/health` | Проверка работы HTTP-сервера |
+| GET | `/docs` | Интерактивная Swagger-документация |
+| GET | `/openapi.json` | Спецификация OpenAPI в JSON |
+| POST | `/api/auth/register` | Регистрация: `email`, `password` (минимум 8 символов); возвращает пользователя и JWT |
+| POST | `/api/auth/login` | Вход: `email`, `password`; возвращает пользователя и JWT |
+| GET | `/api/monitors` | Список мониторов текущего пользователя |
+| POST | `/api/monitors` | Создание монитора: обязательные `name`, `url`; необязательные `intervalSeconds`, `isActive` |
+| GET | `/api/monitors/:id` | Получение монитора по ID |
+| PUT | `/api/monitors/:id` | Изменение переданных полей: `name`, `url`, `intervalSeconds`, `isActive` |
+| DELETE | `/api/monitors/:id` | Удаление монитора вместе с историей проверок и правилами уведомлений |
+| GET | `/api/monitors/:id/checks` | История проверок, новые первыми; параметры `page` (по умолчанию 1) и `pageSize` (по умолчанию 20, максимум 100) |
+| GET | `/api/monitors/:id/uptime` | Аптайм за период: необязательные `from`, `to` в формате даты/ISO 8601; по умолчанию последние 30 дней |
+| GET | `/api/monitors/:id/notifications` | Список правил уведомлений монитора |
+| POST | `/api/monitors/:id/notifications` | Создание правила: `channel` — `log` или `webhook`, `event` — `up`, `down` или `both`; для `webhook` обязателен `webhookUrl` |
+| DELETE | `/api/notifications/:id` | Удаление правила уведомления по его ID |
+
+## Переменные окружения
+
+| Переменная | Значение по умолчанию | Назначение |
+|---|---|---|
+| `DATABASE_URL` | Обязательна; в `.env.example`: `file:./dev.db` | URL базы SQLite. Относительный путь считается от `prisma/schema.prisma`. В Compose задано `file:/data/monitoring.db`, база сохраняется в volume |
+| `PORT` | `3000` | Порт HTTP-сервера. В Compose порт контейнера и опубликованный порт заданы как `3000` |
+| `JWT_SECRET` | Обязательна в приложении | Секрет подписи JWT. В Compose без заданного значения используется демонстрационный `local-demo-secret-change-before-deployment`; перед публикацией задайте собственный секрет |
+| `JWT_EXPIRES_IN` | `7d` | Срок действия JWT, например `1h` или `7d` |
+| `SCHEDULER_TICK_MS` | `10000` в приложении; `1000` в Compose | Период поиска мониторов, которым пора выполнить проверку, в миллисекундах |
+| `CHECK_CONCURRENCY` | `10` | Максимальное число одновременно выполняемых проверок |
+| `HTTP_CHECK_TIMEOUT_MS` | `10000` | Таймаут HTTP-проверки, включая чтение тела ответа, в миллисекундах |
+| `BATCH_SIZE` | `100` | Максимальное число мониторов в одной партии планировщика |
+| `WEBHOOK_TIMEOUT_MS` | `5000` | Таймаут доставки webhook в миллисекундах |

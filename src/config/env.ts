@@ -2,7 +2,8 @@ import "dotenv/config";
 
 function positiveInteger(name: string, fallback: number): number {
   const value = Number(process.env[name] ?? fallback);
-  if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`${name} должен быть положительным целым числом`);
+  if (!Number.isSafeInteger(value) || value <= 0)
+    throw new Error(`${name} должен быть положительным целым числом`);
   return value;
 }
 const jwtSecret = process.env.JWT_SECRET;

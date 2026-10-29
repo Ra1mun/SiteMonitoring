@@ -10,24 +10,32 @@ const credentialsSchema = z.object({
   password: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
 });
 
-router.post("/register", validateBody(credentialsSchema), async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const result = await authService.register(email, password);
-    res.status(201).json(result);
-  } catch (err) {
-    next(err);
-  }
-});
+router.post(
+  "/register",
+  validateBody(credentialsSchema),
+  async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const result = await authService.register(email, password);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
-router.post("/login", validateBody(credentialsSchema), async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const result = await authService.login(email, password);
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-});
+router.post(
+  "/login",
+  validateBody(credentialsSchema),
+  async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const result = await authService.login(email, password);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 export default router;

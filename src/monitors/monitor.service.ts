@@ -16,7 +16,10 @@ export interface UpdateMonitorInput {
 }
 
 export async function listMonitors(userId: string) {
-  return prisma.monitor.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
+  return prisma.monitor.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 export async function getOwnedMonitor(userId: string, monitorId: string) {
@@ -40,7 +43,11 @@ export async function createMonitor(userId: string, input: CreateMonitorInput) {
   });
 }
 
-export async function updateMonitor(userId: string, monitorId: string, input: UpdateMonitorInput) {
+export async function updateMonitor(
+  userId: string,
+  monitorId: string,
+  input: UpdateMonitorInput,
+) {
   await getOwnedMonitor(userId, monitorId);
   return prisma.monitor.update({ where: { id: monitorId }, data: input });
 }
